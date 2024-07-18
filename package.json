@@ -1,0 +1,92 @@
+{
+	"name": "haokejie-plugin-i18ntools",
+	"displayName": "haokejie-plugin-i18ntools",
+	"description": "自动提取中文",
+	"version": "0.0.6",
+	"publisher": "haokejie",
+	"engines": {
+		"vscode": "^1.91.0"
+	},
+	"categories": [
+		"Other"
+	],
+	"repository": {
+		"type": "git",
+		"url": "https://gitee.com/haokejie/extracting-chinese"
+	},
+	"activationEvents": [],
+	"main": "./out/extension.js",
+	"contributes": {
+		"commands": [
+			{
+				"command": "haokejie-extracting-chinese.extracting",
+				"title": "提取中文(当前页)"
+			},
+			{
+				"command": "haokejie-extracting-chinese.helloWorld",
+				"title": "提取中文(批量)"
+			}
+		],
+		"submenus": [
+			{
+				"id": "extracting.submenu",
+				"label": "国际化工具"
+			}
+		],
+		"menus": {
+			"editor/context": [
+				{
+					"when": "resourceExtname =~ /\\.(ts|js|tsx|jsx|vue|html)$/",
+					"submenu": "extracting.submenu",
+					"group": "navigation"
+				}
+			],
+			"extracting.submenu": [
+				{
+					"command": "haokejie-extracting-chinese.extracting",
+					"group": "navigation"
+				},
+				{
+					"command": "haokejie-extracting-chinese.helloWorld",
+					"group": "navigation"
+				}
+			]
+		}
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -p ./",
+		"watch": "tsc -watch -p ./",
+		"pretest": "npm run compile && npm run lint",
+		"lint": "eslint src --ext ts",
+		"test": "node ./out/test/index.js",
+		"testTs": "ts-node ./src/test/index.ts",
+		"test-plugin": "node ./out/test/runTest.js",
+		"build": "node ./build/index.mjs && vsce package"
+	},
+	"devDependencies": {
+		"@types/eslint": "^8.56.10",
+		"@types/eslint-scope": "^3.7.7",
+		"@types/estree": "^1.0.5",
+		"@types/lodash": "^4.17.7",
+		"@types/mocha": "^10.0.7",
+		"@types/node": "20.x",
+		"@types/vscode": "^1.91.0",
+		"@typescript-eslint/eslint-plugin": "^7.14.1",
+		"@vscode/test-cli": "^0.0.9",
+		"@vscode/test-electron": "^2.4.0",
+		"eslint-config-prettier": "^9.1.0",
+		"eslint-plugin-prettier": "^5.2.1",
+		"mocha": "^10.6.0",
+		"prettier": "^3.3.3",
+		"typescript": "^5.4.5"
+	},
+	"dependencies": {
+		"@sapphire/snowflake": "^3.5.3",
+		"@typescript-eslint/parser": "^7.11.0",
+		"eslint": "^8.57.0",
+		"espree": "^10.1.0",
+		"lodash": "^4.17.21",
+		"vue-eslint-parser": "^9.4.3"
+	}
+}
