@@ -25,11 +25,15 @@
 			{
 				"command": "haokejie-plugin-i18ntools.helloWorld",
 				"title": "提取中文(批量)"
+			},
+			{
+				"command": "haokejie-plugin-i18ntools.cleanCache",
+				"title": "清除缓存"
 			}
 		],
 		"submenus": [
 			{
-				"id": "extracting.submenu",
+				"id": "mySubMenu",
 				"label": "国际化工具"
 			}
 		],
@@ -37,18 +41,22 @@
 			"editor/context": [
 				{
 					"when": "resourceExtname =~ /\\.(ts|js|tsx|jsx|vue|html)$/",
-					"submenu": "extracting.submenu",
+					"submenu": "mySubMenu",
 					"group": "navigation"
 				}
 			],
-			"extracting.submenu": [
+			"mySubMenu": [
 				{
 					"command": "haokejie-plugin-i18ntools.extracting",
-					"group": "navigation"
+					"group": "1_actions"
 				},
 				{
 					"command": "haokejie-plugin-i18ntools.helloWorld",
-					"group": "navigation"
+					"group": "1_actions"
+				},
+				{
+					"command": "haokejie-plugin-i18ntools.cleanCache",
+					"group": "2_actions"
 				}
 			]
 		}

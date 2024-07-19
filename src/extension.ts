@@ -5,7 +5,7 @@ import { getSetConfigFile } from './config'
 import { message } from './tool/message'
 import { isString } from 'lodash'
 import { analysis } from './analysis'
-import { getI18nInitLoading, initI18Map } from './store'
+import { getI18nInitLoading, initI18Map, cleanCacheI18n } from './store'
 
 export function activate(context: vscode.ExtensionContext) {
 	const extracting = vscode.commands.registerCommand(CommandsEnum.ExtractChinese, async (uri) => {
@@ -39,6 +39,15 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	})
 
+	const cleanCache = vscode.commands.registerCommand(CommandsEnum.CleanCache, () => {
+		try {
+			cleanCacheI18n()
+			message({ msg: '清除缓存成功', type: MessageType.info })
+		} catch (error) {
+			message({ msg: '处理异常', type: MessageType.error })
+		}
+	})
+
 	const test = vscode.commands.registerCommand('haokejie-plugin-i18ntools.helloWorld', () => {
 		console.log('helloWorld')
 		// The code you place here will be executed every time your command is executed
@@ -46,7 +55,7 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.window.showInformationMessage('Hello World from haokejie-extracting-chinese!')
 	})
 
-	context.subscriptions.push(extracting, test)
+	context.subscriptions.push(extracting, cleanCache, test)
 }
 
 // This method is called when your extension is deactivated

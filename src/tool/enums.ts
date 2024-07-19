@@ -9,6 +9,7 @@ export enum MessageType {
 // 命令枚举集合
 export enum CommandsEnum {
 	ExtractChinese = 'haokejie-plugin-i18ntools.extracting', // 提取文件中的中文
+	CleanCache = 'haokejie-plugin-i18ntools.cleanCache', // 清除缓存
 }
 
 export enum PathEnum {

@@ -2,13 +2,28 @@
 import { getI18nFilePath, getI18nDirPath } from '../config'
 import { traverseDirectory, isAccess } from '../tool/file'
 import { JsonFileManager } from '../tool/json-file'
+import { md5Hash } from '../tool/utils'
+import { forEach, isObject, isArray, forOwn } from 'lodash'
+import { FlattenRts, I18nValueMap } from '../types/plugins'
+import * as fs from 'fs'
+import * as path from 'path'
 
-const i18nValueMap = new Map()
-const i18nJsonMap = new Map()
+const i18nValueMap = new Map<string, I18nValueMap>()
+const i18nJsonMap = new Map<string, JsonFileManager>()
 let i18nIsInit = false
 let i18nInitLoading = false // 初始化的状态
 
-export async function hasI18nValue(value: string) {}
+// 判断是否存在
+export function hasI18nValue(value: string): I18nValueMap | undefined {
+	// 先将 value md5
+	const valueMd5 = md5Hash(value)
+	const i18nMap = i18nValueMap.get(valueMd5)
+	if (i18nMap) {
+		return i18nMap
+	} else {
+		return undefined
+	}
+}
 
 export async function initI18Map() {
 	try {
@@ -30,26 +45,70 @@ export async function initI18Map() {
 		}
 		// 开始生成 json 对象
 		pathDirValues.forEach((item) => {
-			let jsonFile = new JsonFileManager(item)
-			i18nJsonMap.set(item, jsonFile)
+			let jsonFile = new JsonFileManager(item, true)
+			// 获取 parentKey
+			const parentKey = formatI18nParentKey(item)
+			i18nJsonMap.set(parentKey, jsonFile)
+			setI18nValueMap(parentKey, jsonFile, item)
 		})
+		i18nIsInit = true
 	} catch (error) {
-		console.log('初始化错误')
+		console.log('初始化错误', error)
 	} finally {
 		i18nInitLoading = false
 	}
 }
 
+export function setI18nValueMap(parentKey: string, jsonFile: JsonFileManager, filePath: string) {
+	//开始读取 json中的内容并生成 key
+	const jsonObj = jsonFile.readJson()
+	if (jsonObj) {
+		// 需要一个循环迭代器生成 child key
+		const newJsonObj = flattenObject(jsonObj)
+		if (newJsonObj) {
+			forEach(newJsonObj, (flattenItem) => {
+				i18nValueMap.set(
+					flattenItem.md5,
+					Object.assign(flattenItem, { parentKey, filePath })
+				)
+			})
+		}
+	}
+}
+
+// 清除缓存
 export function cleanCacheI18n() {
 	i18nValueMap.clear()
+	i18nJsonMap.clear()
 	i18nIsInit = false
+	i18nInitLoading = false
 }
 
 export function getI18nInitLoading() {
 	return i18nInitLoading
 }
 
-function formatI18nParentKey(path: string): string {
+function formatI18nParentKey(filePath: string): string {
 	const pathDirValue = getI18nDirPath()
-	return ''
+	const relativePath = path.relative(pathDirValue, filePath)
+	const segments = relativePath.split(path.sep).filter((segment) => segment)
+	const formattedKey = segments.map((segment) => path.parse(segment).name).join('.')
+	return formattedKey
+}
+
+function flattenObject(obj: object, parentKey = '', res: FlattenRts = []) {
+	forOwn(obj, (value, key) => {
+		const newKey = parentKey ? `${parentKey}.${key}` : key
+
+		if (isObject(value) && !isArray(value) && value !== null) {
+			flattenObject(value, newKey, res)
+		} else if (isArray(value)) {
+			// 数组对象转化成字符串 JSON.stringify(array)
+			let newValue = JSON.stringify(value)
+			res.push({ key: newKey, value: newValue, md5: md5Hash(newValue) })
+		} else {
+			res.push({ key: newKey, value, md5: md5Hash(value) })
+		}
+	})
+	return res
 }

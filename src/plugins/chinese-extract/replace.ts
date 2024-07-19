@@ -29,5 +29,17 @@ export function entranceText({
 	newTemplateText,
 }: EntranceTextParams) {
 	// 查询 newTemplateText
-	hasI18nValue(newTemplateText)
+
+	const i18nValueMapValue = hasI18nValue(newTemplateText)
+	if (i18nValueMapValue) {
+		// 存在 直接就返回了 相关对象
+		let paramskey = i18nValueMapValue.parentKey
+		let key = i18nValueMapValue.key
+		let newKey = `${paramskey}.${key}`
+
+		// 拼接后的 key
+		replaceText({ node, newTemplateText: newKey })
+	} else {
+		// 不存在 开始往新的 json 插入
+	}
 }

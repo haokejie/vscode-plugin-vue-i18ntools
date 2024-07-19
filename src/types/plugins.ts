@@ -16,3 +16,18 @@ export type EntranceTextParams = {
 	message?: string
 	newTemplateText: string
 }
+
+export interface FlattenRt {
+	key: string
+	value: string
+	md5: string
+}
+
+export type FlattenRts = FlattenRt[]
+
+export interface I18nValueMap extends FlattenRt {
+	parentKey: string
+	filePath: string
+}
+
+export type I18nValueMaps = I18nValueMap[]

@@ -1,12 +1,15 @@
 import * as fs from 'fs'
 import * as path from 'path'
-import { isString, isObject, isArray, omit } from 'lodash'
+import { isString, isObject, isArray, omit, set } from 'lodash'
 
 export class JsonFileManager {
 	private filePath: string
+	// 是否换行
+	private lineFeed: boolean = false
 
-	constructor(filePath: string) {
+	constructor(filePath: string, lineFeed = false) {
 		this.filePath = filePath
+		this.lineFeed = lineFeed
 	}
 
 	public readJson(): object | null {
@@ -53,6 +56,17 @@ export class JsonFileManager {
 		}
 	}
 
+	public setJsonKey(key: string, value: any): void {
+		try {
+			let jsonData = this.readJson() || {}
+			set(jsonData, key, value)
+			this.updateJson(jsonData)
+			console.log('JSON file updated successfully.')
+		} catch (error) {
+			console.error(`Error updating JSON file: ${error}`)
+		}
+	}
+
 	public delKeyJson(paramskeys: string | string[]): void {
 		try {
 			if (isArray(paramskeys) && paramskeys.length <= 0) {
@@ -72,7 +86,10 @@ export class JsonFileManager {
 			// 确保上层文件夹存在
 			this.ensureDirectoryExistence(this.filePath)
 
-			const jsonString = JSON.stringify(updatedData, null, 2)
+			let jsonString = JSON.stringify(updatedData, null, 2)
+			if (this.lineFeed) {
+				jsonString += '\n'
+			}
 			console.log('Updated JSON data')
 			fs.writeFileSync(this.filePath, jsonString, 'utf8')
 		} catch (error) {
