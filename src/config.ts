@@ -14,6 +14,7 @@ export function getConfig(): Config {
 	return configBase
 }
 
+// 获取 config.josn 并初始化
 export async function getSetConfigFile() {
 	const projectPath = getVsCodeProjectPath()
 	const configPath = join(projectPath, PathEnum.ConfigPath)
@@ -29,6 +30,7 @@ export async function getSetConfigFile() {
 	}
 }
 
+// 文件路径
 export function getI18nFilePath(): string {
 	const config = getConfig()
 	const projectPath = getVsCodeProjectPath()
@@ -36,4 +38,10 @@ export function getI18nFilePath(): string {
 	return i18nPatn
 }
 
-getI18nFilePath()
+// i18n dir 文件夹路径
+export function getI18nDirPath(): string {
+	const config = getConfig()
+	const projectPath = getVsCodeProjectPath()
+	const i18nDirPath = join(projectPath, config.outDir, config.i18nLang)
+	return i18nDirPath
+}

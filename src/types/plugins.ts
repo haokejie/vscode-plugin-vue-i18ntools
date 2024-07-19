@@ -10,3 +10,9 @@ export type replaceTextParams = {
 	message?: string
 	newTemplateText: string
 }
+
+export type EntranceTextParams = {
+	node: Node
+	message?: string
+	newTemplateText: string
+}

@@ -1,6 +1,6 @@
 import { ESLint, Rule } from 'eslint'
 import { AST } from 'vue-eslint-parser'
-import { isI18nFn, replaceText } from './replace'
+import { isI18nFn, entranceText } from './replace'
 import { message } from '../../tool/message'
 // import { TwitterSnowflake } from '@sapphire/snowflake'
 
@@ -61,14 +61,17 @@ export const ChineseExtract: ESLint.Plugin = {
 							})
 						},
 						Literal(node: Rule.Node): void {
-							console.log('node', node)
+							// console.log('node', node)
 						},
 						TemplateLiteral(node) {
 							const sourceCode = context.sourceCode
 							const text = sourceCode.getText(node)
-							if (!isI18nFn(text)) {
+							console.log(node)
+							console.log(text)
+							if (isI18nFn(text)) {
 								return
 							}
+							console.log('不是 i18')
 							const quasis = node.quasis.map((q) => q.value.cooked)
 							const expressions = node.expressions.map((exp) =>
 								sourceCode.getText(exp)
@@ -81,7 +84,7 @@ export const ChineseExtract: ESLint.Plugin = {
 								templateString += quasi
 							})
 
-							// 创建新的模板字符串文本
+							// 创建新的模板字符串文本 也就是需要替换的文本 需要查询
 							let newTemplateText = `t('${templateString}')`
 							if (expressions.length !== 0) {
 								newTemplateText = `t('${templateString}', [${expressions.join(
@@ -89,7 +92,7 @@ export const ChineseExtract: ESLint.Plugin = {
 								)}])`
 							}
 
-							replaceText({
+							entranceText({
 								node,
 								newTemplateText,
 							})

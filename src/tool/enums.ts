@@ -8,7 +8,7 @@ export enum MessageType {
 
 // 命令枚举集合
 export enum CommandsEnum {
-	ExtractChinese = 'haokejie-extracting-chinese.extracting', // 提取文件中的中文
+	ExtractChinese = 'haokejie-plugin-i18ntools.extracting', // 提取文件中的中文
 }
 
 export enum PathEnum {

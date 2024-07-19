@@ -12,18 +12,18 @@
 	],
 	"repository": {
 		"type": "git",
-		"url": "https://gitee.com/haokejie/extracting-chinese"
+		"url": "https://gitee.com/haokejie/haokejie-plugin-i18ntools"
 	},
 	"activationEvents": [],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "haokejie-extracting-chinese.extracting",
+				"command": "haokejie-plugin-i18ntools.extracting",
 				"title": "提取中文(当前页)"
 			},
 			{
-				"command": "haokejie-extracting-chinese.helloWorld",
+				"command": "haokejie-plugin-i18ntools.helloWorld",
 				"title": "提取中文(批量)"
 			}
 		],
@@ -43,11 +43,11 @@
 			],
 			"extracting.submenu": [
 				{
-					"command": "haokejie-extracting-chinese.extracting",
+					"command": "haokejie-plugin-i18ntools.extracting",
 					"group": "navigation"
 				},
 				{
-					"command": "haokejie-extracting-chinese.helloWorld",
+					"command": "haokejie-plugin-i18ntools.helloWorld",
 					"group": "navigation"
 				}
 			]
