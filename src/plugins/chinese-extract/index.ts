@@ -1,6 +1,6 @@
 import { ESLint, Rule } from 'eslint'
 import { isI18nFn, entranceText, insertionImportFn, getParentCallExpression } from './replace'
-import { message } from '../../tool/message'
+
 import { removeOuterQuotes, trimSpecial } from '../../tool/utils'
 import type { AST } from 'vue-eslint-parser'
 
@@ -37,9 +37,7 @@ export const ChineseExtract: ESLint.Plugin = {
 			create(context) {
 				let hasTImport = false
 				let lastImportIndex = 0
-				message({
-					msg: '一切正常',
-				})
+
 				return context.parserServices.defineTemplateBodyVisitor(
 					{
 						VText(node: AST.VText) {

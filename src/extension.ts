@@ -30,6 +30,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 			// 进行文件处理
 			await analysis(path)
+			message({ msg: '提取成功', type: MessageType.success })
 		} catch (error) {
 			if (isString(error)) {
 				message({ msg: error, type: MessageType.error })
