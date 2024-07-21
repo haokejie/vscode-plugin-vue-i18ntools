@@ -1,5 +1,6 @@
 import { TemplateLiteral, Node } from 'estree'
 import type { JsonFileManager } from '../tool/json-file'
+import type { Rule } from 'eslint'
 // 替换内容类型
 export enum ReplaceType {
 	TemplateLiteral,
@@ -9,7 +10,7 @@ export enum ReplaceType {
 export type EntranceTextParams = {
 	node: Node
 	message?: string
-	newTemplateText: string
+	templateString: string
 }
 
 export interface FlattenRt {
@@ -30,4 +31,10 @@ export interface I18nJsonMap {
 	parentKey: string
 
 	jsonFile: JsonFileManager
+}
+
+export interface InsertionImportFnParams {
+	node: Node
+	context: Rule.RuleContext
+	lastImportIndex: number
 }

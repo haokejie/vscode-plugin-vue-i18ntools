@@ -1,5 +1,5 @@
 import { ESLint, Rule } from 'eslint'
-import { isI18nFn, entranceText } from './replace'
+import { isI18nFn, entranceText, insertionImportFn } from './replace'
 import { message } from '../../tool/message'
 // import { TwitterSnowflake } from '@sapphire/snowflake'
 
@@ -41,7 +41,6 @@ export const ChineseExtract: ESLint.Plugin = {
 					{},
 					{
 						Program(node) {
-							const sourceCode = context.sourceCode
 							//TODO: 自动导入方法 还未完善
 							node.body.forEach((childNode, index) => {
 								if (childNode.type === 'ImportDeclaration') {
@@ -49,9 +48,9 @@ export const ChineseExtract: ESLint.Plugin = {
 									childNode.specifiers.forEach((specifier) => {
 										if (
 											(specifier.type === 'ImportDefaultSpecifier' &&
-												specifier.local.name === 't') ||
+												specifier.local.name === 'useI18n') ||
 											(specifier.type === 'ImportSpecifier' &&
-												specifier.imported.name === 't')
+												specifier.imported.name === 'useI18n')
 										) {
 											hasTImport = true
 										}
@@ -70,6 +69,18 @@ export const ChineseExtract: ESLint.Plugin = {
 							if (isI18nFn(text)) {
 								return
 							}
+
+							console.log('hasTImport', hasTImport)
+							// TODO: 自动导入方法 暂时不开启 实际上应该封装个函数
+							if (!hasTImport) {
+								insertionImportFn({
+									node,
+									context,
+									lastImportIndex,
+								})
+								return
+							}
+
 							console.log('不是 i18')
 							const quasis = node.quasis.map((q) => q.value.cooked)
 							const expressions = node.expressions.map((exp) =>
@@ -83,18 +94,29 @@ export const ChineseExtract: ESLint.Plugin = {
 								templateString += quasi
 							})
 
-							// 创建新的模板字符串文本 也就是需要替换的文本 需要查询
-							let newTemplateText = `t('${templateString}')`
-							if (expressions.length !== 0) {
-								newTemplateText = `t('${templateString}', [${expressions.join(
-									', '
-								)}])`
+							let newTemplateKey = entranceText({
+								node,
+								templateString,
+							})
+
+							if (newTemplateKey) {
+								// 创建新的模板字符串文本 也就是需要替换的文本 需要查询
+								let newTemplateText = `t('${newTemplateKey}')`
+								if (expressions.length !== 0) {
+									newTemplateText = `t('${newTemplateKey}', [${expressions.join(
+										', '
+									)}])`
+								}
+
+								context.report({
+									node,
+									message: '将模板字符串转换为国际化函数调用',
+									fix(fixer) {
+										return fixer.replaceText(node, newTemplateText)
+									},
+								})
 							}
 
-							entranceText({
-								node,
-								newTemplateText: templateString,
-							})
 							// context.report({
 							// 	node,
 							// 	message: '将模板字符串转换为国际化函数调用',
@@ -102,24 +124,6 @@ export const ChineseExtract: ESLint.Plugin = {
 							// 		return fixer.replaceText(node, newTemplateText)
 							// 	},
 							// })
-
-							// TODO: 自动导入方法 暂时不开启 实际上应该封装个函数
-							// if (!hasTImport) {
-							// 	context.report({
-							// 		node,
-							// 		message: "文件未导入 t 函数",
-							// 		fix(fixer) {
-							// 			const importStatement = "\nimport { t } from 'your-i18n-library';\n";
-							// 			const lastImportNode = context.sourceCode.ast.body[lastImportIndex];
-							// 			if (lastImportIndex === 0) {
-							// 				return fixer.insertTextBeforeRange([0, 0], importStatement);
-							// 			} else {
-							// 				return fixer.insertTextAfter(lastImportNode, importStatement);
-							// 			}
-							// 		}
-							// 	});
-							// 	return;
-							// }
 						},
 					} as Rule.NodeListener,
 					{
