@@ -1,5 +1,4 @@
 import { ESLint, Rule } from 'eslint'
-import { AST } from 'vue-eslint-parser'
 import { isI18nFn, entranceText } from './replace'
 import { message } from '../../tool/message'
 // import { TwitterSnowflake } from '@sapphire/snowflake'
@@ -94,7 +93,7 @@ export const ChineseExtract: ESLint.Plugin = {
 
 							entranceText({
 								node,
-								newTemplateText,
+								newTemplateText: templateString,
 							})
 							// context.report({
 							// 	node,

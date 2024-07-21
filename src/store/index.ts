@@ -1,15 +1,15 @@
 // 这里是个校对库
-import { getI18nFilePath, getI18nDirPath } from '../config'
+import { getI18nFilePath, getI18nDirPath, getConfig } from '../config'
 import { traverseDirectory, isAccess } from '../tool/file'
 import { JsonFileManager } from '../tool/json-file'
 import { md5Hash } from '../tool/utils'
 import { forEach, isObject, isArray, forOwn } from 'lodash'
-import { FlattenRts, I18nValueMap } from '../types/plugins'
+import { FlattenRts, I18nValueMap, I18nJsonMap } from '../types/plugins'
 import * as fs from 'fs'
 import * as path from 'path'
 
 const i18nValueMap = new Map<string, I18nValueMap>()
-const i18nJsonMap = new Map<string, JsonFileManager>()
+const i18nJsonMap = new Map<string, I18nJsonMap>()
 let i18nIsInit = false
 let i18nInitLoading = false // 初始化的状态
 
@@ -48,7 +48,10 @@ export async function initI18Map() {
 			let jsonFile = new JsonFileManager(item, true)
 			// 获取 parentKey
 			const parentKey = formatI18nParentKey(item)
-			i18nJsonMap.set(parentKey, jsonFile)
+			i18nJsonMap.set(parentKey, {
+				parentKey,
+				jsonFile,
+			})
 			setI18nValueMap(parentKey, jsonFile, item)
 		})
 		i18nIsInit = true
@@ -67,12 +70,44 @@ export function setI18nValueMap(parentKey: string, jsonFile: JsonFileManager, fi
 		const newJsonObj = flattenObject(jsonObj)
 		if (newJsonObj) {
 			forEach(newJsonObj, (flattenItem) => {
-				i18nValueMap.set(
-					flattenItem.md5,
-					Object.assign(flattenItem, { parentKey, filePath })
-				)
+				i18nValueMap.set(flattenItem.md5, Object.assign(flattenItem, { parentKey }))
 			})
 		}
+	}
+}
+
+// 开始向 json 创建
+export function createTemplateKey(templateString: string) {
+	console.log('templateString', templateString)
+	const config = getConfig()
+	const [parentKey] = config.outFileName.split('.')
+	console.log('createTemplateKey.parentKey', parentKey)
+	const valueMd5 = md5Hash(templateString)
+	if (i18nJsonMap.has(parentKey)) {
+		const jsonFile = i18nJsonMap.get(parentKey)
+
+		// 构建
+		jsonFile?.jsonFile.setJsonKey(valueMd5, templateString)
+		i18nValueMap.set(valueMd5, {
+			parentKey,
+			md5: valueMd5,
+			value: templateString,
+			key: valueMd5,
+		})
+		return `${parentKey}.${valueMd5}`
+	} else {
+		return null
+	}
+}
+
+// 从 i18nValueMap 获取拼接好的 key
+export function getI18nKey(md5Key: string) {
+	let res = i18nValueMap.get(md5Key)
+	if (res) {
+		const newKey = `${res.parentKey}.${res.key}`
+		return newKey
+	} else {
+		return ''
 	}
 }
 
