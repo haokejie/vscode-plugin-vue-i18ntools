@@ -5,7 +5,6 @@ import {
 } from '../../types/plugins'
 import { hasI18nValue, createTemplateKey } from '../../store/index'
 import { isChinese } from '../../tool/utils'
-import type { AST } from 'vue-eslint-parser'
 
 // 判断有没有 t 方法
 export function isI18nFn(text: string) {

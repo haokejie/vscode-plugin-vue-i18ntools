@@ -1,4 +1,4 @@
-#  Vscode 国际化中文提取插件
+# Vscode 国际化中文提取插件
 
 ## 开发
 
@@ -12,13 +12,10 @@
 
 请先安装 npm install -g @vscode/vsce
 
-## 使用
-
-发布之后运行 npm run build
-
-会生成 vscode-plugin-parrot-{版本文件}.vsix，请自行安装到本地 vscode
-
 ## 功能
+
+仅支持 vue3
+目前主要对 vben-admin 后台管理框架优化 后续会增加跟多可配制功能
 
 ### 自定义配置表
 
@@ -47,9 +44,7 @@ export type Config = {
 	outFileName: 'viewskey.json',
 ```
 
-
 ### 提取中文
-
 
 将会把 vue,js,ts 文件提取中文代码改为t()方式  
 生成 outDir/i18nLang/outFileName 文件，翻译提取内容在该文件中

@@ -5,7 +5,8 @@ import { JsonFileManager } from '../tool/json-file'
 import { md5Hash } from '../tool/utils'
 import { forEach, isObject, isArray, forOwn } from 'lodash'
 import { FlattenRts, I18nValueMap, I18nJsonMap } from '../types/plugins'
-import * as fs from 'fs'
+import { TwitterSnowflake } from '@sapphire/snowflake'
+
 import * as path from 'path'
 
 const i18nValueMap = new Map<string, I18nValueMap>()
@@ -85,16 +86,17 @@ export function createTemplateKey(templateString: string) {
 	const valueMd5 = md5Hash(templateString)
 	if (i18nJsonMap.has(parentKey)) {
 		const jsonFile = i18nJsonMap.get(parentKey)
-
+		let key = TwitterSnowflake.generate().toString()
 		// 构建
-		jsonFile?.jsonFile.setJsonKey(valueMd5, templateString)
+		jsonFile?.jsonFile.setJsonKey(key, templateString)
+
 		i18nValueMap.set(valueMd5, {
 			parentKey,
 			md5: valueMd5,
 			value: templateString,
-			key: valueMd5,
+			key,
 		})
-		return `${parentKey}.${valueMd5}`
+		return `${parentKey}.${key}`
 	} else {
 		return null
 	}
