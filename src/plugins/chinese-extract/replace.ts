@@ -1,5 +1,10 @@
-import { EntranceTextParams, InsertionImportFnParams } from '../../types/plugins'
+import {
+	EntranceTextParams,
+	InsertionImportFnParams,
+	GetParentCallExpressionParams,
+} from '../../types/plugins'
 import { hasI18nValue, createTemplateKey } from '../../store/index'
+import { isChinese } from '../../tool/utils'
 
 // 判断有没有 t 方法
 export function isI18nFn(text: string) {
@@ -10,10 +15,15 @@ export function isI18nFn(text: string) {
 }
 
 // 转化入口 这里相当于入口函数
-export function entranceText({ node, templateString }: EntranceTextParams) {
+export function entranceText({ node, text }: EntranceTextParams): string | null {
 	// 查询 templateString
+	// 先判断字符串是否有中文
 
-	const i18nValueMapValue = hasI18nValue(templateString)
+	if (!isChinese(text)) {
+		return null
+	}
+
+	const i18nValueMapValue = hasI18nValue(text)
 	if (i18nValueMapValue) {
 		// 存在 直接就返回了 相关对象
 		let paramskey = i18nValueMapValue.parentKey
@@ -22,7 +32,7 @@ export function entranceText({ node, templateString }: EntranceTextParams) {
 		return newKey
 	} else {
 		// 不存在 开始往新的 json 插入
-		let newKey = createTemplateKey(templateString)
+		let newKey = createTemplateKey(text)
 		return newKey
 	}
 }
@@ -42,4 +52,35 @@ export function insertionImportFn({ node, context, lastImportIndex }: InsertionI
 			}
 		},
 	})
+}
+
+export function getParentCallExpression({ node, text }: GetParentCallExpressionParams) {
+	let parent = node.parent
+	if (!parent) {
+		console.log('没有父节点')
+		return null
+	}
+	if (parent.type === 'VariableDeclarator') {
+		// 是变量
+		console.log('是变量', node)
+		return true
+	} else if (parent.type === 'Literal') {
+		return false
+	} else if (parent.type === 'Property') {
+		return true
+	} else if (parent.type === 'ReturnStatement') {
+		console.log('return')
+		return true
+	} else if (parent.type === 'ConditionalExpression') {
+		return true
+	} else if (parent.type === 'CallExpression') {
+		return true
+	} else if (parent.type === 'ImportDeclaration') {
+		return false
+	} else if (parent.type === 'ArrayExpression') {
+		return true
+	} else {
+		console.log('不存在的类型', text, parent)
+		return null
+	}
 }

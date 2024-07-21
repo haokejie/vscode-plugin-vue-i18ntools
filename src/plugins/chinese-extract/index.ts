@@ -1,6 +1,8 @@
 import { ESLint, Rule } from 'eslint'
-import { isI18nFn, entranceText, insertionImportFn } from './replace'
+import { isI18nFn, entranceText, insertionImportFn, getParentCallExpression } from './replace'
 import { message } from '../../tool/message'
+import { removeOuterQuotes } from '../../tool/utils'
+
 // import { TwitterSnowflake } from '@sapphire/snowflake'
 
 export const meta = {
@@ -57,9 +59,41 @@ export const ChineseExtract: ESLint.Plugin = {
 									})
 								}
 							})
+							if (!hasTImport) {
+								insertionImportFn({
+									node,
+									context,
+									lastImportIndex,
+								})
+								hasTImport = false
+								return
+							}
 						},
 						Literal(node: Rule.Node): void {
 							// console.log('node', node)
+							const sourceCode = context.sourceCode
+							const text = sourceCode.getText(node)
+							let newText = removeOuterQuotes(text)
+							const CallExpressionName = getParentCallExpression({
+								node,
+								text: newText,
+							})
+							if (CallExpressionName) {
+								let newTemplateKey = entranceText({
+									node,
+									text: newText,
+								})
+								if (newTemplateKey) {
+									let newTemplateText = `t('${newTemplateKey}')`
+									context.report({
+										node,
+										message: '将模板字符串转换为国际化函数调用',
+										fix(fixer) {
+											return fixer.replaceText(node, newTemplateText)
+										},
+									})
+								}
+							}
 						},
 						TemplateLiteral(node) {
 							const sourceCode = context.sourceCode
@@ -67,17 +101,6 @@ export const ChineseExtract: ESLint.Plugin = {
 							console.log(node)
 							console.log(text)
 							if (isI18nFn(text)) {
-								return
-							}
-
-							console.log('hasTImport', hasTImport)
-							// TODO: 自动导入方法 暂时不开启 实际上应该封装个函数
-							if (!hasTImport) {
-								insertionImportFn({
-									node,
-									context,
-									lastImportIndex,
-								})
 								return
 							}
 
@@ -96,7 +119,7 @@ export const ChineseExtract: ESLint.Plugin = {
 
 							let newTemplateKey = entranceText({
 								node,
-								templateString,
+								text: templateString,
 							})
 
 							if (newTemplateKey) {
