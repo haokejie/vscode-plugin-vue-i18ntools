@@ -1,4 +1,4 @@
-# parrot-compiler 鹦鹉翻译 vscode 插件
+#  Vscode 国际化中文提取插件
 
 ## 开发
 
@@ -22,23 +22,17 @@
 
 ### 自定义配置表
 
-在项目根目录下面新增配置文件：parrot-config.js，配置文件可有可无
+在项目根目录下面新增配置文件：extracting-config.json，配置文件可有可无
 
 ```typescript
 export type Config = {
-	// 注意输出的文件地址为：项目地址+outFile+文件.json
 	// 这是文件输出的目录地址
-	outFile: string
-	// 当需要直接输出到i18n当中的json文件时有效，需要配置unified
+	outDir: string
 	// i18n的语言文件目录
 	// 项目的i18n语言路径,路径编写需要前斜杠，如：/src/i18n/zh
-	i18nLang: string | null
-	// file 提取内容按当前文件名称输出
-	// unified 提取内容全部提取到一个文件中
-	fileOutMode: 'file' | 'unified'
+	i18nLang: string
 	// 统一输出的文件名称，固定为json文件
-	// 注意该文件输出的时候会读取这个文件进入到项目词库，避免提取之后的词条重复
-	unifiedFileName: string
+	outFileName: string
 }
 ```
 
@@ -47,34 +41,15 @@ export type Config = {
 以下为项目默认值
 
 ```typescript
-// 支持函数方式或者直接json
-// parrot-config.js
-module.exports = () => {
-	return {
-		// 输出到根目录下面
-		outFile: 'parrot-extract-out',
-		// 项目的i18n语言路径,路径编写需要前斜杠，如：/src/i18n/zh
-		i18nLang: '',
-		// 默认输出到统一文件下面
-		fileOutMode: 'unified',
-		// 输出到一个文件下面的文件名称，固定为json
-		unifiedFileName: 'lang',
-	}
-}
+// json
+	outDir: 'src/locales/lang',
+	i18nLang: 'zh-CN',
+	outFileName: 'viewskey.json',
 ```
 
-### 当 i18n 文件为 json 的时候利用 unifiedFileName 读取原词条特性
-
-unifiedFileName 文件存在的时候是会读取原文件内容的。
-
-所以在配置了 i18nLang 和 unifiedFileName 情况下直接实现提取的词条直接输出到目标文件下面，并且不会重复
 
 ### 提取中文
 
-![提取中文.png](https://raw.githubusercontent.com/ht-sauce/vscode-plugin-parrot/main/docs/images/%E6%8F%90%E5%8F%96%E4%B8%AD%E6%96%87.png)  
-将会把 vue,js,ts 文件提取中文代码改为$t()方式  
-生成 parrot-extract-out 文件夹，翻译提取内容在该文件夹中
 
-## 关于开源
-
-1、项目当中的 vscode 插件不是最新的，请自己重新构建最新版本
+将会把 vue,js,ts 文件提取中文代码改为t()方式  
+生成 outDir/i18nLang/outFileName 文件，翻译提取内容在该文件中

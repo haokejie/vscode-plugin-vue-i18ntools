@@ -2,7 +2,7 @@
 	"name": "haokejie-plugin-i18ntools",
 	"displayName": "haokejie-plugin-i18ntools",
 	"description": "自动提取中文",
-	"version": "0.0.6",
+	"version": "0.0.8",
 	"publisher": "haokejie",
 	"engines": {
 		"vscode": "^1.91.0"
