@@ -47,3 +47,10 @@ export const removeOuterQuotes = (str: string) => {
 	// 如果没有外层的引号，返回原始字符串
 	return str
 }
+
+//去除特殊字符，包含空格
+export function trimSpecial(string = '') {
+	const pattern =
+		/[`~!@#$^\-&*()=|{}':;',\\\[\]\.<>\/?~！@#￥……&*（）——|{}【】'；：""'。，、？\s]/g
+	return string.replace(pattern, '')
+}

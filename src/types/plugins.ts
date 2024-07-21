@@ -9,7 +9,6 @@ export enum ReplaceType {
 }
 
 export type EntranceTextParams = {
-	node: Node
 	message?: string
 	text: string
 }

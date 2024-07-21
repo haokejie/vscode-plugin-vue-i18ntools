@@ -5,6 +5,7 @@ import {
 } from '../../types/plugins'
 import { hasI18nValue, createTemplateKey } from '../../store/index'
 import { isChinese } from '../../tool/utils'
+import type { AST } from 'vue-eslint-parser'
 
 // 判断有没有 t 方法
 export function isI18nFn(text: string) {
@@ -15,7 +16,7 @@ export function isI18nFn(text: string) {
 }
 
 // 转化入口 这里相当于入口函数
-export function entranceText({ node, text }: EntranceTextParams): string | null {
+export function entranceText({ text }: EntranceTextParams): string | null {
 	// 查询 templateString
 	// 先判断字符串是否有中文
 
@@ -78,6 +79,8 @@ export function getParentCallExpression({ node, text }: GetParentCallExpressionP
 	} else if (parent.type === 'ImportDeclaration') {
 		return false
 	} else if (parent.type === 'ArrayExpression') {
+		return true
+	} else if (parent.type === 'AssignmentExpression') {
 		return true
 	} else {
 		console.log('不存在的类型', text, parent)

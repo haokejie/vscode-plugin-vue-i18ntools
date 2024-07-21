@@ -1,7 +1,8 @@
 import { ESLint, Rule } from 'eslint'
 import { isI18nFn, entranceText, insertionImportFn, getParentCallExpression } from './replace'
 import { message } from '../../tool/message'
-import { removeOuterQuotes } from '../../tool/utils'
+import { removeOuterQuotes, trimSpecial } from '../../tool/utils'
+import type { AST } from 'vue-eslint-parser'
 
 // import { TwitterSnowflake } from '@sapphire/snowflake'
 
@@ -40,9 +41,68 @@ export const ChineseExtract: ESLint.Plugin = {
 					msg: '一切正常',
 				})
 				return context.parserServices.defineTemplateBodyVisitor(
-					{},
+					{
+						VText(node: AST.VText) {
+							const newText = trimSpecial(node.value)
+							if (newText) {
+								let newTemplateKey = entranceText({
+									text: newText,
+								})
+								if (newTemplateKey) {
+									console.log('可以转化的 key', newText, newTemplateKey)
+									context.report({
+										node: node as any,
+										message: '将模板字符串转换为国际化函数调用',
+										fix(fixer) {
+											const [start, end] = node.range
+											return fixer.replaceTextRange(
+												[start, end],
+												`{{t('${newTemplateKey}')}}`
+											)
+										},
+									})
+								}
+							}
+						},
+						VLiteral(node: AST.VLiteral) {
+							const text = node.value
+							console.log('newText', node.value, node)
+							if (text) {
+								let newTemplateKey = entranceText({
+									text,
+								})
+								if (newTemplateKey) {
+									const parent = node.parent
+									// 添加冒号
+									context.report({
+										node: parent as any,
+										message: '将模板字符串转换为国际化函数调用',
+										fix(fixer) {
+											return fixer.insertTextBefore(
+												parent as unknown as Rule.Node,
+												':'
+											)
+										},
+									})
+
+									context.report({
+										node: node as any,
+										message: '将模板字符串转换为国际化函数调用',
+										fix(fixer) {
+											const [start, end] = node.range
+											return fixer.replaceTextRange(
+												[start, end],
+												`"t('${newTemplateKey}')"`
+											)
+										},
+									})
+								}
+							}
+						},
+					},
 					{
 						Program(node) {
+							console.log('node', node.body)
 							//TODO: 自动导入方法 还未完善
 							node.body.forEach((childNode, index) => {
 								if (childNode.type === 'ImportDeclaration') {
@@ -80,7 +140,6 @@ export const ChineseExtract: ESLint.Plugin = {
 							})
 							if (CallExpressionName) {
 								let newTemplateKey = entranceText({
-									node,
 									text: newText,
 								})
 								if (newTemplateKey) {
@@ -118,7 +177,6 @@ export const ChineseExtract: ESLint.Plugin = {
 							})
 
 							let newTemplateKey = entranceText({
-								node,
 								text: templateString,
 							})
 
